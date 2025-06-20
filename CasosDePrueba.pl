@@ -21,3 +21,16 @@ false.
 barrel("A", 10, 1).
 barrel("B", 7, 3).
 barrel("C", 3, 0).
+
+/* 
+    Parte 3: Añadir cerveza 
+*/
+?- addBeer("A", 5, Transfer).
+Transfer = 0.
+
+?- addBeer("C", 5, Transfer).
+Transfer = 4.
+
+% Base de conocimientos
+barrel("A", 20, 15).
+barrel("C", 4, 3).
