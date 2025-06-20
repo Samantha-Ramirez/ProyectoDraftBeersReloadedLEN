@@ -66,9 +66,9 @@ initializeBarrels([ID|ID_Tail], [Capacity|CapacityTail], [Beer|BeerTail]) :-
     Parte 2: Existe solución 
 */
 iSolution(BarrelID, Beer, Goal) :-
-    % Validar solo se puede agregar desde A o C
+    % Verificar solo se puede agregar desde A o C
     member(BarrelID, ["A", "C"]),
-    % Validar válidos
+    % Verificar válidos
     number(Beer), Beer >= 0,
     integer(Goal), Goal >= 0,
     % Guardar estado actual de los barriles
@@ -99,15 +99,16 @@ iSolution(BarrelID, Beer, Goal) :-
     Parte 3: Añadir cerveza 
 */
 addBeer(BarrelID, Beer, Transfer) :-
-    % Validar entradas
-    member(BarrelID, ["A", "C"]), % Solo se puede agregar desde A o C
+    % Verificar solo se puede agregar desde A o C
+    member(BarrelID, ["A", "C"]), 
+    % Verificar válidos
     number(Beer), Beer >= 0,
-    % Verificar que el barril existe
+    % Verificar barril existe
     barrel(BarrelID, _, _),
     % Si Beer es 0, no hacer nada
     (   Beer = 0
     ->  Transfer = 0
-    ;   % Obtener el estado actual del barril
+    ;   % Obtener estado actual del barril
         barrel(BarrelID, Capacity, CurrentBeer),
         % Calcular nueva cantidad
         NewBeer is CurrentBeer + Beer,
@@ -147,10 +148,10 @@ addBeer(BarrelID, Beer, Transfer) :-
                         retract(barrel(MinID, MinCapacity, _)),
                         assertz(barrel(MinID, MinCapacity, NewMinBeer)),
                         Transfer = Excess
-                    ;   % Desborde en el destino, fallar
+                    ;   % Desborde en el destino: fallar
                         fail
                     )
-                ;   % No hay barriles destino, fallar
+                ;   % No hay barriles destino: fallar
                     fail
                 )
             )
