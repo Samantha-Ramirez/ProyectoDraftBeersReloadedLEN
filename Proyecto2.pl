@@ -69,10 +69,11 @@ initialBarrels(_, _, _) :- fail.
 */
 iSolution(Barrel, Beer, Goal) :-
     % Verificar solo se puede agregar desde A o C
-    member(Barrel, ["A", "C"]),
+    (Barrel = "A" ; Barrel = "C"),
     % Verificar válidos
     number(Beer), Beer >= 0,
     integer(Goal), Goal >= 0,
+    !,  % Predicado cut
     % Guardar estado actual de los barriles
     findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
     % Intentar añadir cerveza
@@ -117,14 +118,11 @@ iSolution(Barrel, Beer, Goal) :-
             maplist(assertz, SavedBarrels),
             fail
         )
-    ;   % addBeer falló: restaurar estado
+    ;   % addBeer fail: restaurar estado
         retractall(barrel(_, _, _)),
         maplist(assertz, SavedBarrels),
         fail
     ).
-
-% Caso de error
-iSolution(_, _, _) :- fail.
 
 /* 
     Parte 3: Añadir cerveza 
