@@ -69,41 +69,42 @@ initialBarrels(_, _, _) :- fail.
 */
 iSolution(Barrel, Beer, Goal) :-
     (Barrel = "A" ; Barrel = "C"),
-    number(Beer), Beer >= 0, number(Goal), Goal >= 0,
+    number(Beer), Beer >= 0, integer(Goal), Goal >= 0,
     !,
     findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
     addBeer(Barrel, Beer, Transfer),
-    handleTransfer(Transfer, SavedBarrels),
-    barrel(_, _, Goal), !,
+    handleTransfer(Transfer, SavedBarrels, Goal),
     retractall(barrel(_, _, _)),
     maplist(assertz, SavedBarrels).
 
 iSolution(Barrel, Beer, Goal) :-
     (Barrel = "A" ; Barrel = "C"),
-    number(Beer), Beer >= 0, number(Goal), Goal >= 0,
+    number(Beer), Beer >= 0, integer(Goal), Goal >= 0,
     findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
-    (   \+ addBeer(Barrel, Beer, _) ; \+ handleTransfer(Transfer, SavedBarrels) ; \+ barrel(_, _, Goal)),
+    (   \+ addBeer(Barrel, Beer, _) ; \+ handleTransfer(Transfer, SavedBarrels, Goal)),
     retractall(barrel(_, _, _)),
     maplist(assertz, SavedBarrels),
     fail.
 
 % Manejar transferencias y desbordes
-handleTransfer(0, _) :- !.  % Si no hay transferencia
-handleTransfer(Transfer, SavedBarrels) :-
+handleTransfer(0, _, Goal) :- barrel(_, _, Amt), Amt >= Goal, !.
+handleTransfer(Transfer, SavedBarrels, Goal) :-
     barrel("B", BCapacity, BCurrentBeer),
     NewBBeer is BCurrentBeer + Transfer,
     (   NewBBeer =< BCapacity
     ->  retract(barrel("B", BCapacity, _)),
-        assertz(barrel("B", BCapacity, NewBBeer))
+        assertz(barrel("B", BCapacity, NewBBeer)),
+        barrel(_, _, Amt), Amt >= Goal, !
     ;   ExcessB is NewBBeer - BCapacity,
         retract(barrel("B", BCapacity, _)),
         assertz(barrel("B", BCapacity, BCapacity)),
-        transferExcess(ExcessB, SavedBarrels)
+        barrel(_, _, Amt), Amt >= Goal, !;
+        transferExcess(ExcessB, SavedBarrels, Goal)
     ).
 
 % Transferir exceso al barril con menor cantidad
-transferExcess(0, _) :- !.
-transferExcess(Excess, SavedBarrels) :-
+transferExcess(0, _, Goal) :- barrel(_, _, Amt), Amt >= Goal, !.
+transferExcess(Excess, SavedBarrels, Goal) :-
     findall((ID, Amt), (barrel(ID, _, Amt), ID \= "B"), Barrels),
     Barrels \= [],
     sort(2, @=<, Barrels, [(MinID, _)|_]),
@@ -111,22 +112,24 @@ transferExcess(Excess, SavedBarrels) :-
     NewMinBeer is MinBeer + Excess,
     (   NewMinBeer =< MinCapacity
     ->  retract(barrel(MinID, MinCapacity, _)),
-        assertz(barrel(MinID, MinCapacity, NewMinBeer))
+        assertz(barrel(MinID, MinCapacity, NewMinBeer)),
+        barrel(_, _, Amt), Amt >= Goal, !
     ;   ExcessNext is NewMinBeer - MinCapacity,
         retract(barrel(MinID, MinCapacity, _)),
         assertz(barrel(MinID, MinCapacity, MinCapacity)),
-
+        barrel(_, _, Amt), Amt >= Goal, !;
         % Intentar transferir el exceso al otro barril (A o C)
-        OtherID is (MinID = "A" -> "C" ; "A"),
+        (MinID == "A" -> OtherID = "C" ; OtherID = "A"),
         barrel(OtherID, OtherCapacity, OtherBeer),
         NewOtherBeer is OtherBeer + ExcessNext,
         (   NewOtherBeer =< OtherCapacity
         ->  retract(barrel(OtherID, OtherCapacity, _)),
-            assertz(barrel(OtherID, OtherCapacity, NewOtherBeer))
-        ;   % Si hay desborde en el otro barril: restaurar estado y fallar
-            retractall(barrel(_, _, _)),
-            maplist(assertz, SavedBarrels),
-            fail
+            assertz(barrel(OtherID, OtherCapacity, NewOtherBeer)),
+            barrel(_, _, Amt), Amt >= Goal, !
+        ;   % Si hay desborde en el otro barril: llenar al máximo y perder el resto
+            retract(barrel(OtherID, OtherCapacity, _)),
+            assertz(barrel(OtherID, OtherCapacity, OtherCapacity)),
+            barrel(_, _, Amt), Amt >= Goal, !
         )
     ).
 

@@ -21,10 +21,16 @@ true.
 false.
 
 % Base de conocimientos
-initialBarrels(["A", "B", "C"], [5, 3, 2], [0, 0, 0]).
+initialBarrels(["A", "B", "C"], [5, 3, 2], [1, 1, 1]).
 
-?- iSolution("C", 10, 1).
-false.
+?- iSolution("C", 10, 0).
+true.
+
+% Base de conocimientos
+initialBarrels(["A", "B", "C"], [5, 3, 2], [2, 2, 2]).
+
+?- iSolution("C", 1, 1).
+true.
 
 /* 
     Parte 3: Añadir cerveza 

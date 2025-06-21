@@ -30,7 +30,6 @@ Con isSolution se verifica si existe solución al agregar cierta cantidad de cer
 - Se comprueba si algún barril tiene exactamente Goal litros con barrel(_, _, Goal).
 - Si se cumple, restaura el estado original y devuelve true.
 - Si no, entra en la segunda cláusula, restaura el estado y falla (false).
-
 **Manejar transferencias**
 Con handleTransfer.
 - Si Transfer = 0, no hace nada.
