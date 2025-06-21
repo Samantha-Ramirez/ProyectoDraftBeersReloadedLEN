@@ -19,13 +19,28 @@ Con initializeBarrels se valida que las capacidades y cantidades estén en el ra
 - Dado que se usa :- dynamic barrel/3. los hechos son modificables en tiempo de ejecución.
 
 ### Parte 2: Existe solución
-Con 
-**Desborde en B**
-- Se maneja de la misma manera pero ahora se debe encontrar el barril con menor cantidad de cerveza entre "A" y "C".
-- Se recolectan los barriles disponibles con findall y se ordenan por cantidad de cerveza.
-- Se calcula la nueva cantidad en el barril destino (NewMinBeer). 
-- Si no hay desborde (NewMinBeer =< MinCapacity), se actualiza el barril destino y Transfer = Excess. 
-- Si hay desborde, el predicado falla (evitar ciclo infinito).
+Con isSolution se verifica si existe solución al agregar cierta cantidad de cerveza desde un barril específico.
+**Verificaciones**
+- Se verifica que solo se puede agregar desde "A" o "C".
+- Se verifica que las cantidades sean números válidos (>=0).
+**Funcionamiento**
+- Se almacena el estado actual de los barrilles en SavedBarrels.
+- Se llama a addBeer para añadir litros a "A" o "C".
+- Se llama a handleTransfer.
+- Se comprueba si algún barril tiene exactamente Goal litros con barrel(_, _, Goal).
+- Si se cumple, restaura el estado original y devuelve true.
+- Si no, entra en la segunda cláusula, restaura el estado y falla (false).
+
+**Manejar transferencias**
+Con handleTransfer.
+- Si Transfer = 0, no hace nada.
+- Si no, se transfiere el exceso a "B".
+- Si "B" se desborda, se calcula ExcessB y lo pasa a transferExcess.
+**Transferir exceso**
+Con transferExcess.
+- Se transfiere el exceso al barril con menor cantidad.
+- Si este barril se desborda, se transfiere el exceso restante al otro barril (C o A).
+- Si el otro barril se desborda, se restaura el estado y falla.
 
 ### Parte 3: Añadir cerveza 
 Con addBeer se añade cerveza a un barril ("A" o "C") y devuelve en Transfer la cantidad de cerveza que se transfiere a otros barriles en caso de desborde.
