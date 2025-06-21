@@ -28,22 +28,24 @@ Colaboradores:
 /* 
     Parte 1: Inicialización de barriles 
 */
-initialBarrels(IDs, Capacities, Beers) :-
+initialBarrels(Barrels, Capacity, Beer) :-
     % Verificar misma longitud en listas
-    length(IDs, Len),
-    length(Capacities, Len),
-    length(Beers, Len),
+    length(Barrels, Len),
+    length(Capacity, Len),
+    length(Beer, Len),
     % Verificar solo sean 3 barriles
     Len = 3,
-    % Verificar que IDs sean ["A", "B", "C"]
-    IDs = ["A", "B", "C"],
+    % Verificar que Barrels sean ["A", "B", "C"]
+    Barrels = ["A", "B", "C"],
     % Verificar números válidos en capacidades y cantidades
-    maplist(number, Capacities),
-    maplist(number, Beers),
+    maplist(number, Capacity),
+    maplist(number, Beer),
+    % Predicado cut
+    !,
     % Retractar hechos barrel/3
     retractall(barrel(_, _, _)),
     % Inicializar barriles
-    initializeBarrels(IDs, Capacities, Beers).
+    initializeBarrels(Barrels, Capacity, Beer).
 
 % Caso base
 initializeBarrels([], [], []).
@@ -60,21 +62,21 @@ initializeBarrels([ID|ID_Tail], [Capacity|CapacityTail], [Beer|BeerTail]) :-
     initializeBarrels(ID_Tail, CapacityTail, BeerTail).
 
 % Caso de error
-% initialBarrels(_, _, _) :- fail.
+initialBarrels(_, _, _) :- fail.
 
 /* 
     Parte 2: Existe solución 
 */
-iSolution(BarrelID, Beer, Goal) :-
+iSolution(Barrel, Beer, Goal) :-
     % Verificar solo se puede agregar desde A o C
-    member(BarrelID, ["A", "C"]),
+    member(Barrel, ["A", "C"]),
     % Verificar válidos
     number(Beer), Beer >= 0,
     integer(Goal), Goal >= 0,
     % Guardar estado actual de los barriles
     findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
     % Intentar añadir cerveza
-    (   addBeer(BarrelID, Beer, _)
+    (   addBeer(Barrel, Beer, _)
     ->  % Verificar si algún barril tiene exactamente Goal litros
         (   barrel(_, _, Goal)
         ->  % Solución: restaurar estado
@@ -93,36 +95,36 @@ iSolution(BarrelID, Beer, Goal) :-
     ).
 
 % Caso de error
-% iSolution(_, _, _) :- fail.
+iSolution(_, _, _) :- fail.
 
 /* 
     Parte 3: Añadir cerveza 
 */
-addBeer(BarrelID, Beer, Transfer) :-
+addBeer(Barrel, Beer, Transfer) :-
     % Verificar solo se puede agregar desde A o C
-    member(BarrelID, ["A", "C"]), 
+    member(Barrel, ["A", "C"]), 
     % Verificar válidos
     number(Beer), Beer >= 0,
     % Verificar barril existe
-    barrel(BarrelID, _, _),
+    barrel(Barrel, _, _),
     % Si Beer es 0, no hacer nada
     (   Beer = 0
     ->  Transfer = 0
     ;   % Obtener estado actual del barril
-        barrel(BarrelID, Capacity, CurrentBeer),
+        barrel(Barrel, Capacity, CurrentBeer),
         % Calcular nueva cantidad
         NewBeer is CurrentBeer + Beer,
         % Verificar si hay desborde
         (   NewBeer =< Capacity
         ->  % Sin desborde: actualizar el barril
-            retract(barrel(BarrelID, Capacity, _)),
-            assertz(barrel(BarrelID, Capacity, NewBeer)),
+            retract(barrel(Barrel, Capacity, _)),
+            assertz(barrel(Barrel, Capacity, NewBeer)),
             Transfer = 0
         ;   % Con desborde: transferir a B
             Excess is NewBeer - Capacity,
             % Actualizar el barril al máximo
-            retract(barrel(BarrelID, Capacity, _)),
-            assertz(barrel(BarrelID, Capacity, Capacity)),
+            retract(barrel(Barrel, Capacity, _)),
+            assertz(barrel(Barrel, Capacity, Capacity)),
             % Transferir el exceso a B
             barrel("B", BCapacity, BCurrentBeer),
             NewBBeer is BCurrentBeer + Excess,
@@ -159,7 +161,7 @@ addBeer(BarrelID, Beer, Transfer) :-
     ).
 
 % Caso de error
-% addBeer(_, _, _) :- fail.
+addBeer(_, _, _) :- fail.
   
 /* 
     Parte 4: Mejor solución 
