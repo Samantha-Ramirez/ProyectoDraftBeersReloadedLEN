@@ -1,4 +1,3 @@
-
 /* 
 Colaboradores: 
 - Marcel Mejias 30514210 
@@ -55,9 +54,10 @@ initializeBarrels([ID|ID_Tail], [Capacity|CapacityTail], [Beer|BeerTail]) :-
     % Verificar válido
     Capacity >= 0,
     Beer >= 0,
-    Beer =< Capacity,
+    % Usar la menor cantidad entre Beer y Capacity
+    ActualBeer is min(Beer, Capacity),
     % Asertar hecho barrel/3
-    assertz(barrel(ID, Capacity, Beer)),
+    assertz(barrel(ID, Capacity, ActualBeer)),
     % Procesar resto de barriles
     initializeBarrels(ID_Tail, CapacityTail, BeerTail).
 
@@ -166,7 +166,42 @@ addBeer(Barrel, Beer, Transfer) :-
 
 % Caso de error
 addBeer(_, _, _) :- fail.
-  
+
 /* 
     Parte 4: Mejor solución 
 */
+findSolution(0, _, (0, "N/A")) :- !.
+findSolution(Goal, SolutionType, Result) :-
+    integer(Goal), Goal > 0,
+    % Verificar si ya existe un barril con exactamente Goal litros
+    (   barrel(Barrel, _, Goal)
+    ->  Result = (0, Barrel)
+    ;   % Calcular límite máximo de cerveza a probar
+        findall(Cap, barrel(_, Cap, _), Caps),
+        sum_list(Caps, MaxBeer),
+        % Según SolutionType
+        (   SolutionType = "best"
+        ->  % Buscar la menor cantidad de cerveza
+            between(1, MaxBeer, Beer),
+            (Barrel = "A" ; Barrel = "C"),
+            findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
+            addBeer(Barrel, Beer, Transfer),
+            handleTransfer(Transfer, SavedBarrels, Goal),
+            barrel(_, _, Amt), Amt = Goal,
+            Result = (Beer, Barrel),
+            retractall(barrel(_, _, _)),
+            maplist(assertz, SavedBarrels),
+            !
+        ;   SolutionType = "all"
+        ->  % Devolver todas las soluciones
+            between(1, MaxBeer, Beer),
+            (Barrel = "A" ; Barrel = "C"),
+            findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
+            addBeer(Barrel, Beer, Transfer),
+            handleTransfer(Transfer, SavedBarrels, Goal),
+            barrel(_, _, Amt), Amt = Goal,
+            Result = (Beer, Barrel),
+            retractall(barrel(_, _, _)),
+            maplist(assertz, SavedBarrels)
+        )
+    ).

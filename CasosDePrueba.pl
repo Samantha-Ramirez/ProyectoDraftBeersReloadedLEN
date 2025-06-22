@@ -9,6 +9,20 @@ barrel("A", 10, 10).
 barrel("B", 7, 0).
 barrel("C", 3, 0).
 
+?- initialBarrels(["A", "B", "C"], [0, 0, 0], [0, 0, 0]).
+
+% Base de conocimientos:
+barrel("A", 0, 0).
+barrel("B", 0, 0).
+barrel("C", 0, 0).
+
+?- initialBarrels(["A", "B", "C"], [0, 0, 0], [1, 2, 3]).
+
+% Base de conocimientos:
+barrel("A", 0, 0).
+barrel("B", 0, 0).
+barrel("C", 0, 0).
+
 /* 
     Parte 2: Existe solución 
 */
@@ -31,6 +45,25 @@ initialBarrels(["A", "B", "C"], [5, 3, 2], [2, 2, 2]).
 
 ?- iSolution("C", 1, 1).
 true.
+
+% Base de conocimientos
+initialBarrels(["A", "B", "C"], [1, 2, 3], [1, 2, 3]).
+
+?- iSolution("C", 0, 0).
+true.
+
+% Base de conocimientos
+initialBarrels(["A", "B", "C"], [1, 2, 3], [1, 2, 3]).
+
+?- iSolution("C", 0, 1).
+true.
+
+% Base de conocimientos
+% TOFIX
+initialBarrels(["A", "B", "C"], [0, 0, 0], [0, 0, 0]).
+
+?- iSolution("C", 0, 0).
+false.
 
 /* 
     Parte 3: Añadir cerveza 
@@ -67,3 +100,23 @@ initialBarrels(["A", "B", "C"], [0, 7, 4], [0, 0, 3]).
 
 ?- addBeer("A", 1000, Transfer).
 Transfer = 1000. % (0,0)
+
+/* 
+    Parte 4: Mejor solución 
+*/
+% Base de conocimientos
+initialBarrels(["A", "B", "C"], [10, 7, 4], [3, 0, 0]).
+
+?- findSolution(4, "best", Result).
+Result = (1, "A").
+
+?- findSolution(4, "all", Result).
+Result = (1, "A") ;
+Result = (4, "C") ;
+Result = (8, "C") ;
+Result = (11, "A") ;
+Result = (12, "C") ;
+Result = (18, "A").
+
+?- findSolution(1, "best", Result).
+Result = (0, "N/A").
