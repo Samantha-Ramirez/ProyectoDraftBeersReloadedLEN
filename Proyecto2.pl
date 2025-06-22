@@ -74,8 +74,6 @@ iSolution(Barrel, Beer, Goal) :-
     findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
     addBeer(Barrel, Beer, Transfer),
     handleTransfer(Transfer, SavedBarrels, Goal),
-    % Verificar que algún barril tenga exactamente Goal litros
-    barrel(_, _, Amt), Amt = Goal,
     retractall(barrel(_, _, _)),
     maplist(assertz, SavedBarrels).
 
