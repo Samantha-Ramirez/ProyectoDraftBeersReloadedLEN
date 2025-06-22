@@ -4,7 +4,7 @@ Colaboradores:
 - Samantha Ramirez 31307714
 */ 
 /*  
-    Diseñar un programa que permita determinar cuántos litros de cerveza deben agregarse entre los barriles para servir 
+    Diseñar un programa lógico que permita determinar cuántos litros de cerveza deben agregarse entre los barriles para servir 
     exactamente n vasos de cerveza desde cualquiera de las salidas
     Vaso
     - 1 vaso = 1L cerveza
@@ -74,6 +74,8 @@ iSolution(Barrel, Beer, Goal) :-
     findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
     addBeer(Barrel, Beer, Transfer),
     handleTransfer(Transfer, SavedBarrels, Goal),
+    % Verificar que algún barril tenga exactamente Goal litros
+    barrel(_, _, Amt), Amt = Goal,
     retractall(barrel(_, _, _)),
     maplist(assertz, SavedBarrels).
 
@@ -170,38 +172,33 @@ addBeer(_, _, _) :- fail.
 /* 
     Parte 4: Mejor solución 
 */
-findSolution(0, _, (0, "N/A")) :- !.
+findSolution(Goal, _, (0, "N/A")) :- 
+    integer(Goal), Goal > 0,
+    barrel(_, _, Amt), Amt >= Goal, !.
+findSolution(Goal, _, (0, "N/A")) :- 
+    integer(Goal), Goal =< 0, !.
 findSolution(Goal, SolutionType, Result) :-
     integer(Goal), Goal > 0,
-    % Verificar si ya existe un barril con exactamente Goal litros
-    (   barrel(Barrel, _, Goal)
-    ->  Result = (0, Barrel)
-    ;   % Calcular límite máximo de cerveza a probar
-        findall(Cap, barrel(_, Cap, _), Caps),
-        sum_list(Caps, MaxBeer),
-        % Según SolutionType
-        (   SolutionType = "best"
-        ->  % Buscar la menor cantidad de cerveza
-            between(1, MaxBeer, Beer),
-            (Barrel = "A" ; Barrel = "C"),
-            findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
-            addBeer(Barrel, Beer, Transfer),
-            handleTransfer(Transfer, SavedBarrels, Goal),
-            barrel(_, _, Amt), Amt = Goal,
-            Result = (Beer, Barrel),
-            retractall(barrel(_, _, _)),
-            maplist(assertz, SavedBarrels),
-            !
-        ;   SolutionType = "all"
-        ->  % Devolver todas las soluciones
-            between(1, MaxBeer, Beer),
-            (Barrel = "A" ; Barrel = "C"),
-            findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
-            addBeer(Barrel, Beer, Transfer),
-            handleTransfer(Transfer, SavedBarrels, Goal),
-            barrel(_, _, Amt), Amt = Goal,
-            Result = (Beer, Barrel),
-            retractall(barrel(_, _, _)),
-            maplist(assertz, SavedBarrels)
-        )
+    % Calcular límite máximo de cerveza a probar
+    findall(Cap, barrel(_, Cap, _), Caps),
+    sum_list(Caps, MaxBeer),
+    MaxBeerAdjusted is MaxBeer + Goal,
+    % Obtener cantidades iniciales
+    findall(Amt, barrel(_, _, Amt), InitialAmts),
+    sum_list(InitialAmts, InitialBeer),
+    % Probar soluciones
+    findSolutionAux(Goal, SolutionType, MaxBeerAdjusted, InitialBeer, Result).
+
+% Auxiliar para manejar soluciones
+findSolutionAux(Goal, SolutionType, MaxBeerAdjusted, InitialBeer, Result) :-
+    between(1, MaxBeerAdjusted, Beer),
+    Beer =< MaxBeerAdjusted - InitialBeer,
+    (Barrel = "A" ; Barrel = "C"),
+    findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
+    iSolution(Barrel, Beer, Goal),
+    Result = (Beer, Barrel),
+    retractall(barrel(_, _, _)),
+    maplist(assertz, SavedBarrels),
+    (   SolutionType = "best" -> ! % Detener en la primera solución para "best"
+    ;   SolutionType = "all" % Continuar para "all"
     ).
