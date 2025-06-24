@@ -194,7 +194,7 @@ validBeer(Barrel, Beer, Goal) :-
     Remain = NewGoal.
 
 validBeer2("C", Beer, Goal) :-
-    Barrel = "C",  % Explicitly bind Barrel
+    Barrel = "C",
     iSolution(Barrel, Beer, Goal),
     barrel("B", BCapacity, BCurrentBeer),
     barrel(Barrel, Capacity, CurrentBeer),
@@ -207,7 +207,7 @@ validBeer2("C", Beer, Goal) :-
     Remain is NewGoal.
 
 validBeer2("A", Beer, Goal) :-
-    Barrel = "A",  % Explicitly bind Barrel
+    Barrel = "A", 
     iSolution(Barrel, Beer, Goal),
     barrel("B", BCapacity, BCurrentBeer),
     barrel(Barrel, Capacity, CurrentBeer),
@@ -260,6 +260,6 @@ findSolutionAux(Goal, SolutionType, MaxBeerAdjusted, InitialBeer, Result) :-
     Result = (Beer, Barrel),
     retractall(barrel(_, _, _)),
     maplist(assertz, SavedBarrels),
-    (   SolutionType = "best" -> ! % Detener en la primera solución para "best"
+    (   SolutionType = "best" -> ! % Detener en la primera para "best"
     ;   SolutionType = "all" % Continuar para "all"
     ).
