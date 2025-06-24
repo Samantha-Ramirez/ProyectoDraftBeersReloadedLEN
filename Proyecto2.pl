@@ -166,31 +166,33 @@ addBeer(Barrel, Beer, Transfer) :-
 
 % Caso de error
 addBeer(_, _, _) :- fail.
-
-ValidBeer(Barrel, Beer, preBeer, Goal) :-
-    member(Barrel, ["A", "C"]),
-    iSolution(Barrel, Beer, Goal),
-    iSolution(Barrel, preBeer, Goal),
-    barrel(Barrel, Capacity, CurrentBeer),
-    SpaceAvailable is integer(Capacity) - integer(CurrentBeer),
-    integer(preBeer) =< SpaceAvailable,
-    integer(Beer) > SpaceAvailable.
-
-
-ValidBeer(Barrel, Beer, preBeer, Goal) :-
-    member(Barrel, ["A", "C"]),
-    iSolution(Barrel, Beer, Goal),
-    iSolution(Barrel, preBeer, Goal),
-    barrel("B", Capacity, CurrentBeer),
-    SpaceAvailable is integer(Capacity) - integer(CurrentBeer),
-    integer(preBeer) =< SpaceAvailable,
-    integer(Beer) > SpaceAvailable.
-
-
     
 /* 
     Parte 4: Mejor solución 
 */
+validBeer(Barrel, Beer, PreBeer, Goal) :-
+    member(Barrel, ["A", "C"]),
+    iSolution(Barrel, Beer, Goal),
+    iSolution(Barrel, PreBeer, Goal),
+    barrel(Barrel, Capacity, CurrentBeer),
+    SpaceAvailable is integer(Capacity) - integer(CurrentBeer),
+    integer(PreBeer) =< SpaceAvailable,
+    integer(Beer) > SpaceAvailable.
+
+validBeer(Barrel, Beer, PreBeer, Goal) :-
+    member(Barrel, ["A", "C"]),
+    iSolution(Barrel, Beer, Goal),
+    iSolution(Barrel, PreBeer, Goal),
+    barrel("B", Capacity, CurrentBeer),
+    SpaceAvailable is integer(Capacity) - integer(CurrentBeer),
+    integer(PreBeer) =< SpaceAvailable,
+    integer(Beer) > SpaceAvailable.
+
+validBeer(Barrel, Beer, PreBeer, Goal) :-
+    member(Barrel, ["A", "C"]),
+    iSolution(Barrel, Beer, Goal),
+    not(iSolution(Barrel, PreBeer, Goal)).
+
 findSolution(Goal, _, (0, "N/A")) :- 
     integer(Goal), Goal > 0,
     barrel(_, _, Amt), Amt >= Goal, !.
@@ -211,8 +213,8 @@ findSolution(Goal, SolutionType, Result) :-
 % Auxiliar para manejar soluciones
 findSolutionAux(Goal, SolutionType, MaxBeerAdjusted, InitialBeer, Result) :-
     between(1, MaxBeerAdjusted, Beer),
-    preBeer is Beer - 1,
-    ValidBeer(Barrel, Beer, preBeer, Goal),
+    PreBeer is Beer - 1,
+    validBeer(Barrel, Beer, PreBeer, Goal),
     Beer =< MaxBeerAdjusted - InitialBeer,
     (Barrel = "A" ; Barrel = "C"),
     findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
