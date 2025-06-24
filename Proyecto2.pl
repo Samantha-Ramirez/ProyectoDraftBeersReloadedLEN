@@ -171,38 +171,54 @@ addBeer(_, _, _) :- fail.
 /* 
     Parte 4: Mejor solución 
 */
-validBeer(Barrel, Beer, PreBeer, Goal) :-
+validBeer(Barrel, Beer, Goal) :-
+
     member(Barrel, ["A", "C"]),
     iSolution(Barrel, Beer, Goal),
-    iSolution(Barrel, PreBeer, Goal),
     barrel(Barrel, Capacity, CurrentBeer),
     SpaceAvailable is integer(Capacity) - integer(CurrentBeer),
-    integer(PreBeer) =< SpaceAvailable,
-    integer(Beer) > SpaceAvailable,
-    barrel("B", BCapacity, BCurrentBeer),
-    Remain is Beer-SpaceAvailable,
-    BGoal is Goal-BCurrentBeer,
-    Remain = BGoal.
+    integer(Beer) =< SpaceAvailable,
+    NewGoal is Goal - CurrentBeer,
+    Beer = NewGoal.
 
 
-validBeer(Barrel, Beer, PreBeer, Goal) :-
+validBeer(Barrel, Beer, Goal) :-
+
     member(Barrel, ["A", "C"]),
     iSolution(Barrel, Beer, Goal),
-    iSolution(Barrel, PreBeer, Goal),
     barrel("B", BCapacity, BCurrentBeer),
     barrel(Barrel, Capacity, CurrentBeer),
     SpaceAvailable is integer(Capacity) - integer(CurrentBeer),
     Remain is Beer-SpaceAvailable,
-    PreRemain is PreBeer-SpaceAvailable,
-    BSpaceAvailable is Goal - integer(BCurrentBeer),
-    PreRemain < BSpaceAvailable,
-    Remain = BSpaceAvailable.
+    NewGoal is Goal - integer(BCurrentBeer),
+    Remain = NewGoal.
 
+validBeer2("C", Beer, Goal) :-
 
-validBeer(Barrel, Beer, PreBeer, Goal) :-
-    member(Barrel, ["A", "C"]),
     iSolution(Barrel, Beer, Goal),
-    not(iSolution(Barrel, PreBeer, Goal)).
+    barrel("B", BCapacity, BCurrentBeer),
+    barrel(Barrel, Capacity, CurrentBeer),
+    barrel("A", ACapacity, ACurrentBeer),
+    SpaceAvailable is integer(Capacity) - integer(CurrentBeer),
+    Temporal is Beer-SpaceAvailable,
+    BSpaceAvailable is integer(BCapacity) - integer(BCurrentBeer),
+    Remain is Temporal - BSpaceAvailable,
+    NewGoal is Goal - integer(ACurrentBeer),
+    Remain = NewGoal.
+
+validBeer2("A", Beer, Goal) :-
+
+    iSolution(Barrel, Beer, Goal),
+    barrel("B", BCapacity, BCurrentBeer),
+    barrel(Barrel, Capacity, CurrentBeer),
+    barrel("C", ACapacity, ACurrentBeer),
+
+    SpaceAvailable is integer(Capacity) - integer(CurrentBeer),
+    Temporal is Beer-SpaceAvailable,
+    BSpaceAvailable is integer(BCapacity) - integer(BCurrentBeer),
+    Remain is Temporal - BSpaceAvailable,
+    NewGoal is Goal - integer(CCurrentBeer),
+    Remain = NewGoal.
 
 findSolution(Goal, _, (0, "N/A")) :- 
     integer(Goal), Goal > 0,
@@ -224,8 +240,7 @@ findSolution(Goal, SolutionType, Result) :-
 % Auxiliar para manejar soluciones
 findSolutionAux(Goal, SolutionType, MaxBeerAdjusted, InitialBeer, Result) :-
     between(1, MaxBeerAdjusted, Beer),
-    PreBeer is Beer - 1,
-    validBeer(Barrel, Beer, PreBeer, Goal),
+    (validBeer(Barrel, Beer, Goal) ; validBeer2(Barrel, Beer, Goal)),
     Beer =< MaxBeerAdjusted - InitialBeer,
     (Barrel = "A" ; Barrel = "C"),
     findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
