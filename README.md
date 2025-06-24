@@ -57,3 +57,8 @@ Con addBeer se añade cerveza a un barril ("A" o "C") y devuelve en Transfer la 
 - Si hay desborde (NewBeer > Capacity), se actualiza el barril al máximo, se calcula la cantidad sobrante.
 
 ### Parte 4: Mejor solución
+Con ValidBeer y ValidBeer2 se toma una cantidad de cervezas agregadas y se comprueba si es una solución posible unica.
+**Casos**
+- En el primer ValidBeer se verifica si la cantidad de cerveza agregada logra que el barril donde se esta agregando ("A" o "C") llega al objetivo.
+- En el segundo ValidBeer se verifica si la cantidad de cerveza agregada logra que el barril B llege al objetivo a través del desborde del barril "A" o el barril "C".
+- En los dos validBeer2 se prueban de forma separada el caso donde tratamos con el barril "A" y el caso donde tratamos con el barril "C". Estas funciones nos verifican si la cantidad de cerveza agregada logre que el barril al extremo opuesto llegue al objetivo a través del desborde del barril de orrigen y del barril "B"
