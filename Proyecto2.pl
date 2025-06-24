@@ -178,16 +178,26 @@ validBeer(Barrel, Beer, PreBeer, Goal) :-
     barrel(Barrel, Capacity, CurrentBeer),
     SpaceAvailable is integer(Capacity) - integer(CurrentBeer),
     integer(PreBeer) =< SpaceAvailable,
-    integer(Beer) > SpaceAvailable.
+    integer(Beer) > SpaceAvailable,
+    barrel("B", BCapacity, BCurrentBeer),
+    Remain is Beer-SpaceAvailable,
+    BGoal is Goal-BCurrentBeer,
+    Remain = BGoal.
+
 
 validBeer(Barrel, Beer, PreBeer, Goal) :-
     member(Barrel, ["A", "C"]),
     iSolution(Barrel, Beer, Goal),
     iSolution(Barrel, PreBeer, Goal),
-    barrel("B", Capacity, CurrentBeer),
+    barrel("B", BCapacity, BCurrentBeer),
+    barrel(Barrel, Capacity, CurrentBeer),
     SpaceAvailable is integer(Capacity) - integer(CurrentBeer),
-    integer(PreBeer) =< SpaceAvailable,
-    integer(Beer) > SpaceAvailable.
+    Remain is Beer-SpaceAvailable,
+    PreRemain is PreBeer-SpaceAvailable,
+    BSpaceAvailable is Goal - integer(BCurrentBeer),
+    PreRemain < BSpaceAvailable,
+    Remain = BSpaceAvailable.
+
 
 validBeer(Barrel, Beer, PreBeer, Goal) :-
     member(Barrel, ["A", "C"]),
