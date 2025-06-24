@@ -68,23 +68,24 @@ initialBarrels(_, _, _) :- fail.
     Parte 2: Existe solución 
 */
 iSolution(Barrel, Beer, Goal) :-
-    (Barrel = "A" ; Barrel = "C"),
+    % Verificar que Barrel sea "A" o "C"
+    (Barrel = "A" ; Barrel = "C"), !, % Corte para eliminar el punto de elección
+    % Verificar que Beer y Goal sean válidos
     number(Beer), Beer >= 0, integer(Goal), Goal >= 0,
-    !,
+    % Guardar estado actual de los barriles
     findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
-    addBeer(Barrel, Beer, Transfer),
-    handleTransfer(Transfer, SavedBarrels, Goal),
-    retractall(barrel(_, _, _)),
-    maplist(assertz, SavedBarrels).
-
-iSolution(Barrel, Beer, Goal) :-
-    (Barrel = "A" ; Barrel = "C"),
-    number(Beer), Beer >= 0, integer(Goal), Goal >= 0,
-    findall(barrel(ID, Cap, Amt), barrel(ID, Cap, Amt), SavedBarrels),
-    (   \+ addBeer(Barrel, Beer, _) ; \+ handleTransfer(Transfer, SavedBarrels, Goal)),
-    retractall(barrel(_, _, _)),
-    maplist(assertz, SavedBarrels),
-    fail.
+    % Intentar agregar cerveza y manejar transferencias
+    (   addBeer(Barrel, Beer, Transfer),
+        handleTransfer(Transfer, SavedBarrels, Goal)
+    ->  % Caso de éxito: restaurar estado y retornar true
+        retractall(barrel(_, _, _)),
+        maplist(assertz, SavedBarrels),
+        true
+    ;   % Caso de fallo: restaurar estado y retornar false
+        retractall(barrel(_, _, _)),
+        maplist(assertz, SavedBarrels),
+        false
+    ).
 
 % Manejar transferencias y desbordes
 handleTransfer(0, _, Goal) :- barrel(_, _, Amt), Amt >= Goal, !.
