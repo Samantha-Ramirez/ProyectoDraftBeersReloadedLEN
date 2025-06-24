@@ -194,7 +194,7 @@ validBeer(Barrel, Beer, Goal) :-
     Remain = NewGoal.
 
 validBeer2("C", Beer, Goal) :-
-
+    Barrel = "C",  % Explicitly bind Barrel
     iSolution(Barrel, Beer, Goal),
     barrel("B", BCapacity, BCurrentBeer),
     barrel(Barrel, Capacity, CurrentBeer),
@@ -204,21 +204,21 @@ validBeer2("C", Beer, Goal) :-
     BSpaceAvailable is integer(BCapacity) - integer(BCurrentBeer),
     Remain is Temporal - BSpaceAvailable,
     NewGoal is Goal - integer(ACurrentBeer),
-    Remain = NewGoal.
+    Remain is NewGoal.
 
 validBeer2("A", Beer, Goal) :-
-
+    Barrel = "A",  % Explicitly bind Barrel
     iSolution(Barrel, Beer, Goal),
     barrel("B", BCapacity, BCurrentBeer),
     barrel(Barrel, Capacity, CurrentBeer),
-    barrel("C", ACapacity, ACurrentBeer),
+    barrel("C", CCapacity, CCurrentBeer),
 
     SpaceAvailable is integer(Capacity) - integer(CurrentBeer),
     Temporal is Beer-SpaceAvailable,
     BSpaceAvailable is integer(BCapacity) - integer(BCurrentBeer),
     Remain is Temporal - BSpaceAvailable,
     NewGoal is Goal - integer(CCurrentBeer),
-    Remain = NewGoal.
+    Remain is NewGoal.
 
 findSolution(Goal, _, (0, "N/A")) :- 
     integer(Goal), Goal > 0,
