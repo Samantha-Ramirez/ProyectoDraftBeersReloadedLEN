@@ -234,8 +234,20 @@ findSolution(Goal, SolutionType, Result) :-
     % Obtener cantidades iniciales
     findall(Amt, barrel(_, _, Amt), InitialAmts),
     sum_list(InitialAmts, InitialBeer),
-    % Probar soluciones
-    findSolutionAux(Goal, SolutionType, MaxBeerAdjusted, InitialBeer, Result).
+    % Probar soluciones y recoger todas en una lista
+    (   SolutionType = "best"
+    ->  findSolutionAux(Goal, SolutionType, MaxBeerAdjusted, InitialBeer, Result0),
+        Result = Result0
+    ;   SolutionType = "all",
+        findall((Beer, Barrel), 
+                (between(1, MaxBeerAdjusted, Beer),
+                 (validBeer(Barrel, Beer, Goal) ; validBeer2(Barrel, Beer, Goal)),
+                 Beer =< MaxBeerAdjusted - InitialBeer,
+                 (Barrel = "A" ; Barrel = "C"),
+                 iSolution(Barrel, Beer, Goal)),
+                Solutions),
+        member(Result, Solutions)
+    ).
 
 % Auxiliar para manejar soluciones
 findSolutionAux(Goal, SolutionType, MaxBeerAdjusted, InitialBeer, Result) :-
