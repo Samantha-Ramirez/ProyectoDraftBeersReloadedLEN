@@ -62,3 +62,7 @@ Con ValidBeer y ValidBeer2 se toma una cantidad de cervezas agregadas y se compr
 - En el primer ValidBeer se verifica si la cantidad de cerveza agregada logra que el barril donde se esta agregando ("A" o "C") llega al objetivo.
 - En el segundo ValidBeer se verifica si la cantidad de cerveza agregada logra que el barril B llege al objetivo a través del desborde del barril "A" o el barril "C".
 - En los dos validBeer2 se prueban de forma separada el caso donde tratamos con el barril "A" y el caso donde tratamos con el barril "C". Estas funciones nos verifican si la cantidad de cerveza agregada logre que el barril al extremo opuesto llegue al objetivo a través del desborde del barril de orrigen y del barril "B"
+
+Luego en FindSolution se calcula el número maximo de cerveza para añadir a iterar y se va probando añadir todos los posibles valores hasta este número máximo
+
+Por último en FindSolutionAux se crea una lista con todos los barriles y se aplica la función a todos para cada iteración de la cantidad de cerveza a añadir a excepción del caso donde se coloque "Best" de parametro en el cual solo se opera con el primer valor de Beer y por ende se optiene la mejor solución unicamente.
